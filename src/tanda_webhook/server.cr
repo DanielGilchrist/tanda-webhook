@@ -13,6 +13,7 @@ module Tanda::Webhook
     SPLITTER              = ("=" * 100).colorize.magenta
     FILE_TIME_FORMAT      = "%Y-%m-%d-%H-%M-%S"
     OUTPUT_DIR            = "output"
+    TOTAL                 = "total"
 
     # {
     #   "https://some_url.com" => {
@@ -80,6 +81,8 @@ module Tanda::Webhook
       url_counts = @request_counts[url] ||= URLCounts.new
       topic = webhook.payload.topic
 
+      url_counts[TOTAL] ||= 0
+      url_counts[TOTAL] += 1
       url_counts[topic] ||= 0
       url_counts[topic] += 1
 
