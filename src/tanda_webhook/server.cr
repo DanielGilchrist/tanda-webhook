@@ -19,7 +19,9 @@ module Tanda::Webhook
     #     "schedule.published" => 2,
     #   },
     # }
-    alias RequestCounts = Hash(String, Hash(String, Int32))
+    alias RequestCounts = Hash(String, URLCounts)
+    alias URLCounts = Hash(String, UInt32)
+
     alias KemalContext = HTTP::Server::Context
 
     def self.run
@@ -32,11 +34,17 @@ module Tanda::Webhook
 
     def run
       Kemal.run do
-        before_all &->track_request(KemalContext)
+        before_all do |ctx|
+          print_splitter
+          track_request(ctx)
+        end
 
         post "/", &->handle_post_index(KemalContext)
 
-        after_all &->log_counts(KemalContext)
+        after_all do |ctx|
+          log_counts(ctx)
+          print_splitter
+        end
       end
     end
 
@@ -51,7 +59,7 @@ module Tanda::Webhook
     private def track_request(ctx : KemalContext)
       url = ctx.request.hostname.to_s
 
-      url_counts = @request_counts[url] ||= Hash(String, Int32).new
+      url_counts = @request_counts[url] ||= URLCounts.new
       topic = ctx.params.json["payload"].as(Hash(String, JSON::Any))["topic"].as_s?
 
       if topic.nil?
@@ -65,7 +73,6 @@ module Tanda::Webhook
 
     private def log_counts(_ctx : KemalContext)
       pretty_print_obj(REQUEST_COUNTS_STRING, @request_counts)
-      puts SPLITTER
     end
 
     private def pretty_print_obj(header, obj)
@@ -73,6 +80,10 @@ module Tanda::Webhook
       puts header
       pp obj
       puts
+    end
+
+    private def print_splitter
+      puts SPLITTER
     end
   end
 end
