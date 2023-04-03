@@ -1,0 +1,22 @@
+name: tanda-webhook
+version: 0.1.0
+
+authors:
+  - Daniel Gilchrist <daniel@workforce.com>
+
+targets:
+  tanda-webhook:
+    main: src/tanda-webhook.cr
+
+crystal: 1.7.3
+
+license: MIT
+
+dependencies:
+  kemal:
+    github: kemalcr/kemal # https://github.com/kemalcr/kemal
+
+development_dependencies:
+  ameba:
+    github: crystal-ameba/ameba # https://github.com/crystal-ameba/ameba
+    version: ~> 1.4.3
