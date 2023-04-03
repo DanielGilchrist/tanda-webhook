@@ -41,8 +41,8 @@ module Tanda::Webhook
 
         post "/", &->handle_post_index(KemalContext)
 
-        after_all do |ctx|
-          log_counts(ctx)
+        after_all do |_ctx|
+          log_counts
           print_splitter
         end
       end
@@ -71,7 +71,7 @@ module Tanda::Webhook
       url_counts[topic] += 1
     end
 
-    private def log_counts(_ctx : KemalContext)
+    private def log_counts
       pretty_print_obj(REQUEST_COUNTS_STRING, @request_counts)
     end
 
