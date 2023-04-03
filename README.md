@@ -4,10 +4,11 @@ Test Tanda Webhooks with Crystal & Kemal
 
 ## Features
 ### Logs requests in terminal
-<img width="750" alt="image" src="https://user-images.githubusercontent.com/13454550/229565086-956c45b1-9727-41c4-83bd-1e45e7578aa0.png">
+<img width="750" alt="image" src="https://user-images.githubusercontent.com/13454550/229633802-96039786-07ea-451b-9e54-6b9ef8b238f5.png">
+
 
 ### Writes to a JSON file when the program exits
-<img width="750" alt="image" src="https://user-images.githubusercontent.com/13454550/229625120-da31cdf3-6af1-4fac-9d4e-28cdd4ccc8d4.png">
+<img width="750" alt="image" src="https://user-images.githubusercontent.com/13454550/229634050-074d701f-da10-42ec-954d-7bf081780303.png">
 
 ## Installation & Usage
 
