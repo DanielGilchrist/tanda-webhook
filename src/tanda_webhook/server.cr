@@ -67,10 +67,10 @@ module Tanda::Webhook
       puts SPLITTER
     end
 
-    private def pretty_print_obj(header, json)
+    private def pretty_print_obj(header, obj)
       puts
       puts header
-      pp json
+      pp obj
       puts
     end
   end
