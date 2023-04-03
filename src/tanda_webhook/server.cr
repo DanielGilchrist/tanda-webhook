@@ -1,4 +1,5 @@
 require "colorize"
+require "file_utils"
 require "json"
 require "kemal"
 
@@ -11,6 +12,7 @@ module Tanda::Webhook
     REQUEST_COUNTS_STRING = "Request counts:".colorize.yellow
     SPLITTER              = ("=" * 100).colorize.magenta
     FILE_TIME_FORMAT      = "%Y-%m-%d-%H-%M-%S"
+    OUTPUT_DIR            = "output"
 
     # {
     #   "https://some_url.com" => {
@@ -55,11 +57,17 @@ module Tanda::Webhook
     private def write_to_json_file
       time = Time.local
       formatted_time = Time::Format.new(FILE_TIME_FORMAT).format(time)
-      filename = "output/requests-#{formatted_time}.json"
+      filename = "#{OUTPUT_DIR}/requests-#{formatted_time}.json"
+
+      create_output_dir_if_not_exists
 
       puts "Writing output to #{filename}...".colorize.green
-      File.write(filename, @requests.to_json)
+      File.write(filename, content: @requests.to_json)
       puts "Done!".colorize.green
+    end
+
+    def create_output_dir_if_not_exists
+      FileUtils.mkdir_p(OUTPUT_DIR) unless File.directory?(OUTPUT_DIR)
     end
 
     private def track_and_log_request(ctx : KemalContext)
