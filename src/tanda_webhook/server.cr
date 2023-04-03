@@ -8,6 +8,9 @@ module Tanda::Webhook
     BODY_STRING           = "Body:".colorize.yellow
     REQUEST_COUNTS_STRING = "Request counts:".colorize.yellow
     SPLITTER              = ("=" * 100).colorize.magenta
+    FILE_TIME_FORMAT      = "%Y-%m-%d-%H-%M-%S"
+    PAYLOAD               = "payload"
+    TOPIC                 = "topic"
 
     # {
     #   "https://some_url.com" => {
@@ -29,6 +32,7 @@ module Tanda::Webhook
     end
 
     def initialize
+      @requests = {requests: Array({headers: HTTP::Headers, payload: Hash(String, JSON::Any)}).new, counts: RequestCounts.new}
       @request_counts = RequestCounts.new
     end
 
@@ -46,6 +50,19 @@ module Tanda::Webhook
           print_splitter
         end
       end
+    ensure
+      @requests[:counts].merge!(@request_counts)
+      write_to_json_file
+    end
+
+    private def write_to_json_file
+      time = Time.local
+      formatted_time = Time::Format.new(FILE_TIME_FORMAT).format(time)
+      filename = "output/requests-#{formatted_time}.json"
+
+      puts "Writing output to #{filename}...".colorize.green
+      File.write(filename, @requests.to_json)
+      puts "Done!".colorize.green
     end
 
     private def handle_post_index(ctx : KemalContext)
@@ -57,10 +74,12 @@ module Tanda::Webhook
     end
 
     private def track_request(ctx : KemalContext)
-      url = ctx.request.hostname.to_s
+      payload = ctx.params.json[PAYLOAD].as(Hash(String, JSON::Any))
+      @requests[:requests] << {headers: ctx.request.headers, payload: payload}
 
+      url = ctx.request.hostname.to_s
       url_counts = @request_counts[url] ||= URLCounts.new
-      topic = ctx.params.json["payload"].as(Hash(String, JSON::Any))["topic"].as_s?
+      topic = payload[TOPIC].as_s?
 
       if topic.nil?
         puts "No topic found in payload".colorize.red
