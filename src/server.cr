@@ -6,8 +6,8 @@ module Tanda::Webhook
   class Server
     alias KEnv = HTTP::Server::Context
 
-    def self.run!
-      new.run!
+    def self.run
+      new.run
     end
 
     def initialize
@@ -24,14 +24,14 @@ module Tanda::Webhook
       @request_counts = Hash(String, Hash(String, Int32)).new
     end
 
-    def run!
-      before_all &->track_request(KEnv)
+    def run
+      Kemal.run do
+        before_all &->track_request(KEnv)
 
-      post "/", &->post_index(KEnv)
+        post "/", &->post_index(KEnv)
 
-      after_all &->log_counts(KEnv)
-
-      Kemal.run
+        after_all &->log_counts(KEnv)
+      end
     end
 
     private def post_index(env : KEnv)

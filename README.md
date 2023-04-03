@@ -1,27 +1,18 @@
 # tanda-webhook
 
-TODO: Write a description here
+Testing Tanda Webhooks with Crystal & Kemal
 
-## Installation
+## Installation & Usage
 
-TODO: Write installation instructions here
+You will need Crystal 1.7.3 installed. I recommend using [`asdf`](https://github.com/asdf-vm/asdf) with the [crystal plugin](https://github.com/asdf-community/asdf-crystal).
+```sh
+asdf install crystal 1.7.3
+```
+Or you can checkout [this link](https://crystal-lang.org/install/) for platform specific instructions
 
-## Usage
+Then
+1. Clone the repository
+2. Run `shards install`
+3. Run `./scripts/build/release.sh && ./bin/tanda-webhook`
 
-TODO: Write usage instructions here
-
-## Development
-
-TODO: Write development instructions here
-
-## Contributing
-
-1. Fork it (<https://github.com/your-github-user/tanda-webhook/fork>)
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
-
-## Contributors
-
-- [Daniel Gilchrist](https://github.com/your-github-user) - creator and maintainer
+Your local server is now running

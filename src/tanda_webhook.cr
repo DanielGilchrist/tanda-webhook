@@ -6,7 +6,7 @@ module Tanda::Webhook
   VERSION = "0.1.0"
 
   def main
-    Tanda::Webhook::Server.run!
+    Tanda::Webhook::Server.run
   end
 end
 
