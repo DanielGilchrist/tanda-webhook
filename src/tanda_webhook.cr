@@ -6,10 +6,18 @@ module Tanda::Webhook
   VERSION = "0.1.0"
 
   def main
-    Kemal.config.env = {% if flag?(:debug) %}
-      "development"
-    {% else %}
-      "production"
+    Kemal.config.env = {% begin %}
+      \{% if flag?(:debug) %}
+        # Development mode
+        # By running `crystal run ./src/tanda_webhook.cr`
+        "development"
+      \{% else %}
+        # Release mode
+        # By Running `./scripts/build/release.sh`
+        # or
+        # ./bin/tanda-webhook
+        "production"
+      \{% end %}
     {% end %}
 
     Tanda::Webhook::Server.run
