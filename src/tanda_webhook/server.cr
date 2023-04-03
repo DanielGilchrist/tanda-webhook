@@ -34,7 +34,7 @@ module Tanda::Webhook
     end
 
     def initialize
-      @requests = {requests: Array({headers: HTTP::Headers, body: Types::Webhook}).new, counts: RequestCounts.new}
+      @requests = {counts: RequestCounts.new, requests: Array({headers: HTTP::Headers, body: Types::Webhook}).new}
       @request_counts = RequestCounts.new
     end
 
