@@ -20,9 +20,10 @@ Or you can checkout [this link](https://crystal-lang.org/install/) for platform 
 Then
 1. Clone the repository
 2. Run `shards install`
-3. Run `./scripts/build/release.sh && ./bin/tanda-webhook`
+3. Run `./scripts/build/release.sh` to build the release binary
+4. Run the program with `./bin/tanda-webhook`
 
-You will now have a release build and a Kemal server running on port 3000
+You will now have a release build and a Kemal server running on port 3000. You will likely want to use [ngrok](https://ngrok.com/download) or a similar tool to expose your local server to the internet.
 
 **Note:** If you have issues executing the release script run `chmod +x ./scripts/build/release.sh` to make the script executable.
 
