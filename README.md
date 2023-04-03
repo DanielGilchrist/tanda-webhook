@@ -1,6 +1,6 @@
 # tanda-webhook
 
-Testing Tanda Webhooks with Crystal & Kemal
+Test Tanda Webhooks with Crystal & Kemal
 
 ## Features
 ### Logs requests in terminal
