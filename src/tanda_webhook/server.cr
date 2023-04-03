@@ -9,7 +9,7 @@ module Tanda::Webhook
     REQUEST_COUNTS_STRING = "Request counts:".colorize.yellow
     SPLITTER              = ("=" * 100).colorize.magenta
 
-    alias KEnv = HTTP::Server::Context
+    alias KemalContext = HTTP::Server::Context
 
     def self.run
       new.run
@@ -31,15 +31,15 @@ module Tanda::Webhook
 
     def run
       Kemal.run do
-        before_all &->track_request(KEnv)
+        before_all &->track_request(KemalContext)
 
-        post "/", &->post_index(KEnv)
+        post "/", &->handle_post_index(KemalContext)
 
-        after_all &->log_counts(KEnv)
+        after_all &->log_counts(KemalContext)
       end
     end
 
-    private def post_index(env : KEnv)
+    private def handle_post_index(env : KemalContext)
       # no content
       env.response.status_code = 204
 
@@ -47,7 +47,7 @@ module Tanda::Webhook
       pretty_print_obj(BODY_STRING, env.params.json)
     end
 
-    private def track_request(env : KEnv)
+    private def track_request(env : KemalContext)
       url = env.request.hostname.to_s
 
       url_counts = @request_counts[url] ||= Hash(String, Int32).new
@@ -62,7 +62,7 @@ module Tanda::Webhook
       url_counts[topic] += 1
     end
 
-    private def log_counts(_env : KEnv)
+    private def log_counts(_env : KemalContext)
       pretty_print_obj(REQUEST_COUNTS_STRING, @request_counts)
       puts SPLITTER
     end
