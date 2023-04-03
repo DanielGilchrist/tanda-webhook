@@ -2,6 +2,15 @@
 
 Testing Tanda Webhooks with Crystal & Kemal
 
+## Features
+### Logs requests in terminal
+<img width="600" alt="image" src="https://user-images.githubusercontent.com/13454550/229538252-c735b54f-18f7-47b8-9102-540f6dab5964.png">
+
+### Writes to a JSON file when the program exits
+
+![image](https://user-images.githubusercontent.com/13454550/229538913-bbe5827f-94c6-410a-a4ef-313e9c26bec7.png)
+
+
 ## Installation & Usage
 
 You will need Crystal 1.7.3 installed. I recommend using [`asdf`](https://github.com/asdf-vm/asdf) with the [crystal plugin](https://github.com/asdf-community/asdf-crystal).
