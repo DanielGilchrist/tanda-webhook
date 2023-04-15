@@ -12,9 +12,9 @@ Test Tanda Webhooks with Crystal & Kemal
 
 ## Installation & Usage
 
-You will need Crystal 1.7.3 installed. I recommend using [`asdf`](https://github.com/asdf-vm/asdf) with the [crystal plugin](https://github.com/asdf-community/asdf-crystal).
+You will need Crystal 1.8.0 installed. I recommend using [`asdf`](https://github.com/asdf-vm/asdf) with the [crystal plugin](https://github.com/asdf-community/asdf-crystal).
 ```sh
-asdf install crystal 1.7.3
+asdf install crystal 1.8.0
 ```
 Or you can checkout [this link](https://crystal-lang.org/install/) for platform specific instructions
 
