@@ -19,4 +19,3 @@ dependencies:
 development_dependencies:
   ameba:
     github: crystal-ameba/ameba # https://github.com/crystal-ameba/ameba
-    version: ~> 1.4.3
