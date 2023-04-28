@@ -51,11 +51,14 @@ module Tanda::Webhook
         end
       end
     ensure
-      @requests[:counts].merge!(@request_counts)
       write_to_json_file
     end
 
     private def write_to_json_file
+      return if @request_counts.empty?
+
+      @requests[:counts].merge!(@request_counts)
+
       time = Time.local
       formatted_time = Time::Format.new(FILE_TIME_FORMAT).format(time)
       filename = "#{OUTPUT_DIR}/requests-#{formatted_time}.json"
