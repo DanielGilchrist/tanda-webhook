@@ -36,7 +36,6 @@ module Tanda::Webhook
 
     def initialize
       @requests = {counts: RequestCounts.new, requests: Array({headers: HTTP::Headers, body: Types::Webhook}).new}
-      @request_counts = RequestCounts.new
     end
 
     def run
@@ -55,9 +54,7 @@ module Tanda::Webhook
     end
 
     private def write_to_json_file
-      return if @request_counts.empty?
-
-      @requests[:counts].merge!(@request_counts)
+      return if request_counts.empty?
 
       time = Time.local
       formatted_time = Time::Format.new(FILE_TIME_FORMAT).format(time)
@@ -81,7 +78,7 @@ module Tanda::Webhook
       @requests[:requests] << {headers: ctx.request.headers, body: webhook}
 
       url = ctx.request.hostname.to_s
-      url_counts = @request_counts[url] ||= URLCounts.new
+      url_counts = request_counts[url] ||= URLCounts.new
       topic = webhook.payload.topic
 
       url_counts[TOTAL] ||= 0
@@ -93,8 +90,12 @@ module Tanda::Webhook
       pretty_print_obj(BODY_STRING, JSON.parse(webhook.to_json))
     end
 
+    private def request_counts
+      @requests[:counts]
+    end
+
     private def log_counts
-      pretty_print_obj(REQUEST_COUNTS_STRING, @request_counts)
+      pretty_print_obj(REQUEST_COUNTS_STRING, request_counts)
     end
 
     private def pretty_print_obj(header, obj)
