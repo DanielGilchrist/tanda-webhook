@@ -90,7 +90,7 @@ module Tanda::Webhook
       pretty_print_obj(BODY_STRING, JSON.parse(webhook.to_json))
     end
 
-    private def request_counts
+    private def request_counts : RequestCounts
       @requests[:counts]
     end
 
