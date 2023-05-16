@@ -1,17 +1,22 @@
 require "json"
-
 require "./webhook_payload"
+require "../../error/*"
 
 module Tanda::Webhook
   module Types
     class Webhook
       include JSON::Serializable
 
-      def self.from(request : HTTP::Request) : self?
+      def self.from(request : HTTP::Request) : self | Error::Base
         body = request.body
-        return if body.nil?
+        puts body
+        return Error::MissingPayload.new if body.nil?
 
-        from_json(body)
+        begin
+          from_json(body)
+        rescue error : JSON::SerializableError
+          Error::MalformedPayload.new(body, error)
+        end
       end
 
       getter hook_key : String
