@@ -25,8 +25,8 @@ module Tanda::Webhook
     #     "schedule.published" => 2,
     #   },
     # }
-    alias RequestCounts = Hash(String, URLCounts)
-    alias URLCounts = Hash(String, UInt32)
+    alias RequestCounts = Hash(String, TopicCounts)
+    alias TopicCounts = Hash(String, UInt32)
 
     alias KemalContext = HTTP::Server::Context
 
@@ -35,7 +35,10 @@ module Tanda::Webhook
     end
 
     def initialize
-      @requests = {counts: RequestCounts.new, requests: Array({headers: HTTP::Headers, body: Types::Webhook}).new}
+      @requests = {
+        counts:   RequestCounts.new(default_value: TopicCounts.new(default_value: 0)),
+        requests: Array({headers: HTTP::Headers, body: Types::Webhook}).new,
+      }
     end
 
     def run
@@ -78,12 +81,10 @@ module Tanda::Webhook
       @requests[:requests] << {headers: ctx.request.headers, body: webhook}
 
       url = ctx.request.hostname.to_s
-      url_counts = request_counts[url] ||= URLCounts.new
+      url_counts = request_counts[url]
       topic = webhook.payload.topic
 
-      url_counts[TOTAL] ||= 0
       url_counts[TOTAL] += 1
-      url_counts[topic] ||= 0
       url_counts[topic] += 1
 
       pretty_print_obj(HEADERS_STRING, ctx.request.headers.to_h)
