@@ -81,11 +81,11 @@ module Tanda::Webhook
       @requests[:requests] << {headers: ctx.request.headers, body: webhook}
 
       url = ctx.request.hostname.to_s
-      url_counts = request_counts[url]
+      topic_counts = request_counts[url]
       topic = webhook.payload.topic
 
-      url_counts[TOTAL] += 1
-      url_counts[topic] += 1
+      topic_counts[TOTAL] += 1
+      topic_counts[topic] += 1
 
       pretty_print_obj(HEADERS_STRING, ctx.request.headers.to_h)
       pretty_print_obj(BODY_STRING, JSON.parse(webhook.to_json))
