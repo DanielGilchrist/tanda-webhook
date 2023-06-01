@@ -8,7 +8,7 @@ module Tanda::Webhook
       abstract def pretty_message
 
       def handle!
-        {% if flag?(:debug?) %}
+        {% if flag?(:debug) %}
           raise self
         {% else %}
           puts pretty_message
