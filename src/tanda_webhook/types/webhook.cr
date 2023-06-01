@@ -23,8 +23,8 @@ module Tanda::Webhook
             body.rewind
             json = body.gets_to_end
             Error::MalformedPayload.new(json, error)
-          rescue e : JSON::ParseException
-            Error::NonJSONPayload.new(e)
+          rescue error : JSON::ParseException
+            Error::NonJSONPayload.new(error)
           end
         end
       end
