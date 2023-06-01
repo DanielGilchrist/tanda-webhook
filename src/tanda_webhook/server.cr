@@ -76,7 +76,7 @@ module Tanda::Webhook
 
     private def track_and_log_request(ctx : KemalContext)
       webhook = Types::Webhook.from(ctx.request)
-      return puts "Webhook payload is empty!".colorize.red if webhook.nil?
+      return webhook.handle! if webhook.is_a?(Error::Base)
 
       @requests[:requests] << {headers: ctx.request.headers, body: webhook}
 
