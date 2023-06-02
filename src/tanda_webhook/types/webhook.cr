@@ -11,21 +11,17 @@ module Tanda::Webhook
         request_body = request.body
         return Error::MissingPayload.new if request_body.nil?
 
-        # We need to copy the IO to an IO::Memory because if the JSON can't be parsed initially
-        # the IO would be consumed and needs to be rewinded so we can try again
-        body = IO::Memory.new
-        IO.copy(request_body, body)
+        # TODO: Avoid building a String if possible
+        # This is a hack to get around needing to potentially consume the request body IO twice
+        # It'd be nice if we could rewind the IO, but I haven't been able to figure out how yet
+        body_string = String.build do |io|
+          IO.copy(request_body, io)
+        end
 
         begin
-          from_json(body)
+          from_json(body_string)
         rescue error : JSON::SerializableError | JSON::ParseException
-          begin
-            body.rewind
-            json = body.gets_to_end
-            Error::MalformedPayload.new(json, error)
-          rescue error : JSON::ParseException
-            Error::NonJSONPayload.new(error)
-          end
+          Error::MalformedPayload.new(body_string, error)
         end
       end
 
