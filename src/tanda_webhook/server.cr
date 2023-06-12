@@ -137,9 +137,6 @@ module Tanda::Webhook
       def empty? : Bool
         @counts.empty?
       end
-
-      private getter counts : RequestCounts
-      private getter requests : Array({headers: HTTP::Headers, body: Types::Webhook})
     end
   end
 end
