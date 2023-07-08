@@ -13,9 +13,7 @@ module Tanda::Webhook
         "development"
       {% else %}
         # Release mode
-        # By running `./scripts/build/release.sh`
-        # or
-        # ./bin/tanda-webhook
+        # By running `./scripts/build/release.sh` && `./bin/tanda-webhook`
         "production"
       {% end %}
     end
