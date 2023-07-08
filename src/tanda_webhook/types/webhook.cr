@@ -1,6 +1,6 @@
 require "json"
 require "./webhook_payload"
-require "../../error/*"
+require "../error/*"
 
 module Tanda::Webhook
   module Types
