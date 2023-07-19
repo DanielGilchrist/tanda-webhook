@@ -8,7 +8,7 @@ targets:
   tanda-webhook:
     main: src/tanda-webhook.cr
 
-crystal: 1.9.1
+crystal: 1.9.2
 
 license: MIT
 
