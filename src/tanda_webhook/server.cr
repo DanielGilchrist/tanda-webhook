@@ -3,17 +3,20 @@ require "file_utils"
 require "json"
 require "kemal"
 
+require "./terminal"
 require "./types/webhook"
 
 module Tanda::Webhook
   class Server
     HEADERS_STRING   = "Headers:".colorize.yellow
     BODY_STRING      = "Body:".colorize.yellow
-    SPLITTER         = ("=" * 100).colorize.magenta
     FILE_TIME_FORMAT = "%Y-%m-%d-%H-%M-%S"
     OUTPUT_DIR       = "output"
+    DEFAULT_COLUMNS  = 100
 
     alias KemalContext = HTTP::Server::Context
+
+    @splitter : Colorize::Object(String)? = nil
 
     def self.run
       new.run
@@ -77,7 +80,17 @@ module Tanda::Webhook
     end
 
     private def print_splitter
-      puts SPLITTER
+      puts splitter
+    end
+
+    private def splitter : Colorize::Object(String)
+      @splitter ||= begin
+        terminal = Terminal.new
+        window = terminal.window
+        columns = window.columns || DEFAULT_COLUMNS
+
+        ("=" * columns).colorize.magenta
+      end
     end
 
     private module Helpers
