@@ -63,13 +63,10 @@ module Tanda::Webhook
       webhook = Types::Webhook.from(ctx.request)
       return webhook.handle! if webhook.is_a?(Error::Base)
 
-      url = ctx.request.hostname.to_s
-      topic = webhook.payload.topic
+      request = ctx.request
+      @request_log.record_webhook!(request, webhook)
 
-      @request_log.increment_request_counts!(url, topic)
-      @request_log.set_request!(headers: ctx.request.headers, body: webhook)
-
-      Helpers.pretty_print_obj(HEADERS_STRING, ctx.request.headers.to_h)
+      Helpers.pretty_print_obj(HEADERS_STRING, request.headers.to_h)
       Helpers.pretty_print_obj(BODY_STRING, JSON.parse(webhook.to_json))
     end
 
@@ -134,13 +131,14 @@ module Tanda::Webhook
         @requests = Requests.new
       end
 
-      def set_request!(headers : HTTP::Headers, body : Types::Webhook)
-        @requests << {headers: headers, body: body}
-      end
+      def record_webhook!(request : HTTP::Request, webhook : Types::Webhook)
+        url = request.hostname.to_s
+        topic = webhook.payload.topic
 
-      def increment_request_counts!(url : String, topic : String)
         @counts[TOTAL_COUNT_KEY][topic] += 1
         @counts[url][topic] += 1
+
+        @requests << {headers: request.headers, body: webhook}
       end
 
       def log_counts
