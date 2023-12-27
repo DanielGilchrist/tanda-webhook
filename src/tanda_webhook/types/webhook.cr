@@ -20,8 +20,8 @@ module Tanda::Webhook
 
         begin
           from_json(body_string)
-        rescue error : JSON::SerializableError | JSON::ParseException
-          Error::MalformedPayload.new(body_string, error)
+        rescue ex : JSON::SerializableError | JSON::ParseException
+          Error::MalformedPayload.new(body_string, ex)
         end
       end
 
