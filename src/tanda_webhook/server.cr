@@ -77,7 +77,7 @@ module Tanda::Webhook
       webhook = Types::Webhook.from(request)
       return webhook if webhook.is_a?(Error::Base)
 
-      secret = @secret # tandawebhooktest
+      secret = @secret
       return webhook if secret.nil?
 
       expected_signature = request.headers["X-Hook-Signature"]
