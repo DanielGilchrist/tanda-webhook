@@ -2,6 +2,7 @@ require "colorize"
 require "file_utils"
 require "json"
 require "kemal"
+require "openssl/hmac"
 
 require "./terminal"
 require "./types/webhook"
@@ -18,11 +19,12 @@ module Tanda::Webhook
 
     @splitter : Colorize::Object(String)? = nil
 
-    def self.run
-      new.run
+    def self.run(secret : String?)
+      new(secret).run
     end
 
-    def initialize
+    def initialize(secret : String?)
+      @secret = secret
       @request_log = RequestLog.new
     end
 
@@ -60,14 +62,32 @@ module Tanda::Webhook
     end
 
     private def track_and_log_request(ctx : KemalContext)
-      webhook = Types::Webhook.from(ctx.request)
+      webhook = parse_and_verify_webhook(ctx.request)
       return webhook.handle! if webhook.is_a?(Error::Base)
 
       request = ctx.request
       @request_log.record_webhook!(request, webhook)
 
+      puts "Valid webhook received!".colorize.green if @secret
       Helpers.pretty_print_obj(HEADERS_STRING, request.headers.to_h)
       Helpers.pretty_print_obj(BODY_STRING, JSON.parse(webhook.to_json))
+    end
+
+    private def parse_and_verify_webhook(request : HTTP::Request) : Types::Webhook | Error::Base
+      webhook = Types::Webhook.from(request)
+      return webhook if webhook.is_a?(Error::Base)
+
+      secret = @secret # tandawebhooktest
+      return webhook if secret.nil?
+
+      expected_signature = request.headers["X-Hook-Signature"]
+      return Error::MissingSignature.new if expected_signature.blank?
+
+      payload = webhook.payload.to_json
+      actual_signature = OpenSSL::HMAC.hexdigest(:sha1, secret, payload)
+      return Error::SignatureMismatch.new(expected_signature, actual_signature) if expected_signature != actual_signature
+
+      webhook
     end
 
     private def splitters(&)
