@@ -19,16 +19,18 @@ module Tanda::Webhook
 
     @splitter : Colorize::Object(String)? = nil
 
-    def self.run(secret : String?)
-      new(secret).run
+    def self.run
+      new.run
     end
 
-    def initialize(secret : String?)
-      @secret = secret
+    def initialize
+      @secret = ENV["TANDA_WEBHOOK_SECRET_KEY"]?
       @request_log = RequestLog.new
     end
 
     def run
+      output_secret_key_header
+
       Kemal.run do
         post "/" do |ctx|
           ctx.response.status_code = 204
@@ -69,6 +71,7 @@ module Tanda::Webhook
       @request_log.record_webhook!(request, webhook)
 
       puts "Valid webhook received!".colorize.green if @secret
+      puts "#{"Secret".colorize.yellow}: #{@secret}" if @secret
       Helpers.pretty_print_obj(HEADERS_STRING, request.headers.to_h)
       Helpers.pretty_print_obj(BODY_STRING, JSON.parse(webhook.to_json))
     end
@@ -108,6 +111,16 @@ module Tanda::Webhook
 
         ("=" * columns).colorize.magenta
       end
+    end
+
+    private def output_secret_key_header
+      if @secret
+        puts "Using \"#{@secret}\" for webhook verification checks".colorize.white.bold
+      else
+        puts "No secret key provided - skipping webhook verification checks".colorize.white.bold
+        puts "To verify webhooks set the TANDA_WEBHOOK_SECRET_KEY environment variable"
+      end
+      puts
     end
 
     private module Helpers
