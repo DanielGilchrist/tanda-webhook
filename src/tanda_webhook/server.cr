@@ -2,6 +2,7 @@ require "colorize"
 require "file_utils"
 require "json"
 require "kemal"
+require "openssl/hmac"
 
 require "./terminal"
 require "./types/webhook"
@@ -23,10 +24,13 @@ module Tanda::Webhook
     end
 
     def initialize
+      @secret = ENV["TANDA_WEBHOOK_SECRET_KEY"]?
       @request_log = RequestLog.new
     end
 
     def run
+      output_secret_key_header
+
       Kemal.run do
         post "/" do |ctx|
           ctx.response.status_code = 204
@@ -60,14 +64,33 @@ module Tanda::Webhook
     end
 
     private def track_and_log_request(ctx : KemalContext)
-      webhook = Types::Webhook.from(ctx.request)
+      webhook = parse_and_verify_webhook(ctx.request)
       return webhook.handle! if webhook.is_a?(Error::Base)
 
       request = ctx.request
       @request_log.record_webhook!(request, webhook)
 
+      puts "Valid webhook received!".colorize.green if @secret
+      puts "#{"Secret".colorize.yellow}: #{@secret}" if @secret
       Helpers.pretty_print_obj(HEADERS_STRING, request.headers.to_h)
       Helpers.pretty_print_obj(BODY_STRING, JSON.parse(webhook.to_json))
+    end
+
+    private def parse_and_verify_webhook(request : HTTP::Request) : Types::Webhook | Error::Base
+      webhook = Types::Webhook.from(request)
+      return webhook if webhook.is_a?(Error::Base)
+
+      secret = @secret
+      return webhook if secret.nil?
+
+      expected_signature = request.headers["X-Hook-Signature"]
+      return Error::MissingSignature.new if expected_signature.blank?
+
+      payload = webhook.payload.to_json
+      actual_signature = OpenSSL::HMAC.hexdigest(:sha1, secret, payload)
+      return Error::SignatureMismatch.new(expected_signature, actual_signature) if expected_signature != actual_signature
+
+      webhook
     end
 
     private def splitters(&)
@@ -88,6 +111,16 @@ module Tanda::Webhook
 
         ("=" * columns).colorize.magenta
       end
+    end
+
+    private def output_secret_key_header
+      if @secret
+        puts "Using \"#{@secret}\" for webhook verification checks".colorize.white.bold
+      else
+        puts "No secret key provided - skipping webhook verification checks".colorize.white.bold
+        puts "To verify webhooks set the TANDA_WEBHOOK_SECRET_KEY environment variable"
+      end
+      puts
     end
 
     private module Helpers

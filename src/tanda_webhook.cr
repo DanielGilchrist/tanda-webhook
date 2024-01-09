@@ -12,6 +12,8 @@ module Tanda::Webhook
       Kemal.config.env = "production"
     {% end %}
 
+    Kemal.config.app_name = "tanda webhook"
+
     Tanda::Webhook::Server.run
   end
 end
