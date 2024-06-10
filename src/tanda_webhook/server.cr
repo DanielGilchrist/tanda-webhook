@@ -64,10 +64,10 @@ module Tanda::Webhook
     end
 
     private def track_and_log_request(ctx : KemalContext)
-      webhook = parse_and_verify_webhook(ctx.request)
+      request = ctx.request
+      webhook = parse_and_verify_webhook(request)
       return webhook.handle! if webhook.is_a?(Error::Base)
 
-      request = ctx.request
       @request_log.record_webhook!(request, webhook)
 
       puts "Valid webhook received!".colorize.green if @secret
@@ -77,20 +77,20 @@ module Tanda::Webhook
     end
 
     private def parse_and_verify_webhook(request : HTTP::Request) : Types::Webhook | Error::Base
-      webhook = Types::Webhook.from(request)
-      return webhook if webhook.is_a?(Error::Base)
+      request_body = request.body
+      return Error::MissingPayload.new if request_body.nil?
 
-      secret = @secret
-      return webhook if secret.nil?
+      body_string = request_body.gets_to_end
 
-      expected_signature = request.headers["X-Hook-Signature"]
-      return Error::MissingSignature.new if expected_signature.blank?
+      if secret = @secret
+        expected_signature = request.headers["X-Webhook-Signature"]
+        return Error::MissingSignature.new if expected_signature.blank?
 
-      payload = webhook.payload.to_json
-      actual_signature = OpenSSL::HMAC.hexdigest(:sha1, secret, payload)
-      return Error::SignatureMismatch.new(expected_signature, actual_signature) if expected_signature != actual_signature
+        actual_signature = OpenSSL::HMAC.hexdigest(:sha1, secret, body_string)
+        return Error::SignatureMismatch.new(expected_signature, actual_signature) if expected_signature != actual_signature
+      end
 
-      webhook
+      Types::Webhook.from(body_string)
     end
 
     private def splitters(&)
