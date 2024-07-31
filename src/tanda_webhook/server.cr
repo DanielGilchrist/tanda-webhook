@@ -83,14 +83,17 @@ module Tanda::Webhook
       body_string = request_body.gets_to_end
 
       if secret = @secret
-        expected_signature = request.headers["X-Webhook-Signature"]
-        return Error::MissingSignature.new if expected_signature.blank?
+        expected_signature = request.headers["X-Webhook-Signature"]?
+        return Error::MissingSignature.new if expected_signature.nil? || expected_signature.blank?
 
         actual_signature = OpenSSL::HMAC.hexdigest(:sha1, secret, body_string)
         return Error::SignatureMismatch.new(expected_signature, actual_signature) if expected_signature != actual_signature
       end
 
-      Types::Webhook.from(body_string)
+      unverified_webhook = Types::UnverifiedWebhook.from(body_string)
+      return unverified_webhook if unverified_webhook.is_a?(Error::Base)
+
+      unverified_webhook.to_webhook
     end
 
     private def splitters(&)
