@@ -7,11 +7,7 @@ module Tanda::Webhook
     class Webhook
       include JSON::Serializable
 
-      def self.from(body_string : String) : self | Error::Base
-        from_json(body_string)
-      rescue ex : JSON::SerializableError | JSON::ParseException
-        Error::MalformedPayload.new(body_string, ex)
-      end
+      def initialize(@hook_key : String, @hook_time : UInt32, @hook_signature : String, @payload : WebhookPayload); end
 
       getter hook_key : String
       getter hook_time : UInt32
