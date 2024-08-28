@@ -15,6 +15,8 @@ license: MIT
 dependencies:
   kemal:
     github: kemalcr/kemal # https://github.com/kemalcr/kemal
+  spec-kemal:
+    github: kemalcr/spec-kemal # https://github.com/kemalcr/spec-kemal
 
 development_dependencies:
   ameba:
