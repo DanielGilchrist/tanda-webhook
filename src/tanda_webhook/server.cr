@@ -4,7 +4,10 @@ require "json"
 require "kemal"
 require "openssl/hmac"
 
+require "./error/**"
+require "./request_log"
 require "./terminal"
+require "./types/unverified_webhook"
 require "./types/webhook"
 
 module Tanda::Webhook
@@ -59,7 +62,7 @@ module Tanda::Webhook
       puts "Done!".colorize.green
     end
 
-    def create_output_dir_if_not_exists
+    private def create_output_dir_if_not_exists
       FileUtils.mkdir_p(OUTPUT_DIR) unless File.directory?(OUTPUT_DIR)
     end
 
@@ -124,66 +127,6 @@ module Tanda::Webhook
         puts "To verify webhooks set the TANDA_WEBHOOK_SECRET_KEY environment variable"
       end
       puts
-    end
-
-    private module Helpers
-      extend self
-
-      def pretty_print_obj(header, obj)
-        puts
-        puts header
-        pp obj
-        puts
-      end
-    end
-
-    private class RequestLog
-      include JSON::Serializable
-
-      REQUEST_COUNTS_STRING = "Request counts:".colorize.yellow
-      TOTAL_COUNT_KEY       = "total"
-
-      alias Requests = Array({headers: HTTP::Headers, body: Types::Webhook})
-
-      # {
-      #   "https://some_url.com" => {
-      #     "schedule.published" => 1,
-      #     "schedule.updated" => 2,
-      #   },
-      #   "https://some_other_url.com" => {
-      #     "shift.updated" => 1,
-      #     "schedule.published" => 2,
-      #   },
-      # }
-      alias RequestCounts = Hash(String, TopicCounts)
-      alias TopicCounts = Hash(String, UInt32)
-
-      def initialize
-        @counts = RequestCounts.new do |request_counts, url_or_total|
-          request_counts[url_or_total] = TopicCounts.new do |topic_counts, topic|
-            topic_counts[topic] = 0
-          end
-        end
-        @requests = Requests.new
-      end
-
-      def record_webhook!(request : HTTP::Request, webhook : Types::Webhook)
-        url = request.hostname.to_s
-        topic = webhook.payload.topic
-
-        @counts[TOTAL_COUNT_KEY][topic] += 1
-        @counts[url][topic] += 1
-
-        @requests << {headers: request.headers, body: webhook}
-      end
-
-      def log_counts
-        Helpers.pretty_print_obj(REQUEST_COUNTS_STRING, @counts)
-      end
-
-      def empty? : Bool
-        @counts.empty?
-      end
     end
   end
 end

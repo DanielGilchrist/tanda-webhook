@@ -1,4 +1,6 @@
-require "./tanda_webhook/**"
+require "kemal"
+
+require "./tanda_webhook/server"
 
 module Tanda::Webhook
   extend self
